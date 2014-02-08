@@ -3,6 +3,7 @@
 package Enegger;
 use strict;
 use fields qw( databases retry_seconds dead_dsns retry_at funcmap_cache verbose all_abilities current_abilities current_job cached_drivers driver_cache_expiration scoreboard prioritize );
+use 5.008005;
 
 our $VERSION = "1.10";
 

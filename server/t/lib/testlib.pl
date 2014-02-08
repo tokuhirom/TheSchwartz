@@ -92,7 +92,7 @@ sub _load_sql {
 
 package TestDB::MySQL;
 use strict;
-use base 'TestDB';
+use parent 'TestDB';
 
 sub new {
     my ($class, $name) = @_;
@@ -130,7 +130,7 @@ sub schema_file {
 
 package TestDB::SQLite;
 use strict;
-use base 'TestDB';
+use parent 'TestDB';
 
 sub new {
     return undef;

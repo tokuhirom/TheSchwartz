@@ -73,7 +73,7 @@ run_tests(10, sub {
 
 ############################################################################
 package Worker::Addition;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

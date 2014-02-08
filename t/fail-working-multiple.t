@@ -40,7 +40,7 @@ run_tests(4, sub {
 
 ############################################################################
 package Worker::CoalesceTest;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 
 sub work {

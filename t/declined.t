@@ -35,7 +35,7 @@ done_testing;
 
 ############################################################################
 package Worker::CompleteEventually;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

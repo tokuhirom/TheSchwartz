@@ -59,7 +59,7 @@ run_tests(10, sub {
 
 ############################################################################
 package Worker::Fail;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;
@@ -76,7 +76,7 @@ sub retry_delay { 1 }
 # ---------------
 
 package Worker::Complete;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;

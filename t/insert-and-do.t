@@ -97,7 +97,7 @@ run_tests(26, sub {
 
 ############################################################################
 package Worker::Addition;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;
@@ -112,7 +112,7 @@ sub grab_for { 30 }
 
 ############################################################################
 package Worker::MergeInternalDict;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 my %internal_dict;
 
 sub reset { %internal_dict = (); }
@@ -130,7 +130,7 @@ sub grab_for { 10 }
 
 ############################################################################
 package Worker::Division;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

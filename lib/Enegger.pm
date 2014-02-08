@@ -787,7 +787,7 @@ Enegger - reliable job queue
 
     # myworker.pl
     package MyWorker;
-    use base qw( Enegger::Worker );
+    use parent qw( Enegger::Worker );
 
     sub work {
         my $class = shift;

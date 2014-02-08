@@ -2,7 +2,7 @@
 
 package Enegger::JobHandle;
 use strict;
-use base qw( Class::Accessor::Fast );
+use parent qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw( dsn_hashed jobid client ));
 

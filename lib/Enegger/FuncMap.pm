@@ -2,7 +2,7 @@
 
 package Enegger::FuncMap;
 use strict;
-use base qw( Data::ObjectDriver::BaseObject );
+use parent qw( Data::ObjectDriver::BaseObject );
 
 use Carp qw( croak );
 

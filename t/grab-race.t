@@ -73,7 +73,7 @@ sub work {
 
 ############################################################################
 package Worker::Addition;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

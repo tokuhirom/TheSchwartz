@@ -57,7 +57,7 @@ Enegger::Worker - superclass for defining task behavior
 =head1 SYNOPSIS
 
     package MyWorker;
-    use base qw( Enegger::Worker );
+    use parent qw( Enegger::Worker );
 
     sub work {
         my $class = shift;

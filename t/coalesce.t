@@ -41,7 +41,7 @@ run_tests(14, sub {
 
 ############################################################################
 package Worker::CoalesceTest;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 my $client;
 sub set_client { $client = $_[1]; }

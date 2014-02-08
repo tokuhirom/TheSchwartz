@@ -27,7 +27,7 @@ run_tests(2, sub {
 
 ############################################################################
 package Worker::Dummy;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     my $subjob = Enegger::Job->new(
@@ -42,14 +42,14 @@ sub retry_delay { 5 }
 
 
 package Worker::Dummy2;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;
 }
 
 package Worker::Dummy3;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;

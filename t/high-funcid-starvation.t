@@ -43,12 +43,12 @@ run_tests(4, sub {
 });
 
 package Worker::Job1;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;
 }
 
 package Worker::Job2;
-use base 'Worker::Job1';
+use parent -norequire, 'Worker::Job1';
 

@@ -2,7 +2,7 @@
 
 package Enegger::ExitStatus;
 use strict;
-use base qw( Data::ObjectDriver::BaseObject );
+use parent qw( Data::ObjectDriver::BaseObject );
 
 __PACKAGE__->install_properties({
                columns     => [ qw( jobid status funcid

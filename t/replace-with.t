@@ -34,7 +34,7 @@ run_tests(10, sub {
 
 ############################################################################
 package Worker::Foo;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 
 use Test::More;  ## Import test methods.
 

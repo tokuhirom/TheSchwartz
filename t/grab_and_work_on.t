@@ -46,7 +46,7 @@ run_tests(9, sub {
 
 ############################################################################
 package Worker::Grabber;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 use Test::More;
 
 my $client;

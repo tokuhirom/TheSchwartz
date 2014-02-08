@@ -47,7 +47,7 @@ run_tests(31, sub {
 
 ############################################################################
 package Worker::PriorityTest;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 use Test::More;
 
 use strict;

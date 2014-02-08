@@ -55,7 +55,7 @@ run_tests(4, sub {
 sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
 
 package Worker::Foo;
-use base 'Enegger::Worker';
+use parent 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;

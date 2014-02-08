@@ -17,5 +17,5 @@ tests( -e "inc/.author" ? "t/*.t xt/*.t" : "t/*.t" );
 
 install_script('bin/schwartzmon');
 
-auto_install();
+# auto_install();
 WriteAll();

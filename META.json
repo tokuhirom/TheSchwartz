@@ -1,0 +1,88 @@
+{
+   "abstract" : "reliable job queue",
+   "author" : [
+      ", Six Apart Ltd, cpan@sixapart.com. All"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Minilla/v0.11.0, CPAN::Meta::Converter version 2.133380",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Enegger",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "inc",
+         "share",
+         "eg",
+         "examples",
+         "author",
+         "builder"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.36",
+            "Test::More" : "0.88"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "CPAN::Meta" : "0",
+            "CPAN::Meta::Prereqs" : "0",
+            "Module::Build" : "0.38"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Test::CPAN::Meta" : "0",
+            "Test::MinimumVersion" : "0.10108",
+            "Test::Pod" : "1.41",
+            "Test::Spellunker" : "v0.2.7"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Data::ObjectDriver" : "0.04",
+            "Digest::MD5" : "0",
+            "Storable" : "0"
+         }
+      }
+   },
+   "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/tokuhirom/TheSchwartz/issues"
+      },
+      "homepage" : "https://github.com/tokuhirom/TheSchwartz",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/tokuhirom/TheSchwartz.git",
+         "web" : "https://github.com/tokuhirom/TheSchwartz"
+      }
+   },
+   "version" : "1.10",
+   "x_contributors" : [
+      "Mischa Spiegelmock <revmischa@cpan.org>",
+      "Artur Bergman <abergman@cpan.org>",
+      "Mark Paschal <markpasc@markpasc.org>",
+      "Andrew Bunner <abunner@sixapart.com>",
+      "Benjamin Trott <ben@stupidfool.org>",
+      "Garth Webb <garth.webb@gmail.com>",
+      "Kevin Goess <kgoess@sixapart.com>",
+      "Brad Choate <brad@bradchoate.com>",
+      "Brad Fitzpatrick <brad@danga.com>",
+      "Yann Kerherve <yann@cyberion.net>",
+      "Simon Wistow <simonw@cpan.org>",
+      "Adam Thomason <ad@mthomason.net>",
+      "Jonathan Steinert <hachi@kuiki.net>",
+      "Tatsuhiko Miyagawa <miyagawa@bulknews.net>",
+      "Tokuhiro Matsuno <tokuhirom@gmail.com>"
+   ]
+}

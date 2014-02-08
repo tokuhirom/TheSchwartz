@@ -2,19 +2,19 @@
 
 use strict;
 use lib "$ENV{HOME}/hack/Data-ObjectDriver/lib";
-use lib "$ENV{HOME}/hack/TheSchwartz/lib";
+use lib "$ENV{HOME}/hack/Enegger/lib";
 use lib "$ENV{HOME}/hack/gearman/api/perl/Gearman/lib";
 use lib "$ENV{HOME}/cvs/Data-ObjectDriver/lib";
-use lib "$ENV{HOME}/cvs/TheSchwartz/lib";
+use lib "$ENV{HOME}/cvs/Enegger/lib";
 use lib "$ENV{HOME}/cvs/gearman/api/perl/Gearman/lib";
 
 use Gearman::Worker;
-use TheSchwartz;
+use Enegger;
 use JSON::Any;
 
 my $j = JSON::Any->new;
 
-my $ts = TheSchwartz->new(databases => [{
+my $ts = Enegger->new(databases => [{
     dsn => "dbi:mysql:database=t_sch_unnamed",
     user => "root",
     pass => "",
@@ -46,7 +46,7 @@ sub handler {
 sub insert_job {
     my ($job, $json) = @_;
     my $funcname = $json->{funcname} or die "No funcname";
-    my $job = TheSchwartz::Job->new(
+    my $job = Enegger::Job->new(
 				    funcname => $json->{funcname},
 				    arg      => $json->{arg},
 				    uniqkey  => $json->{uniqkey},

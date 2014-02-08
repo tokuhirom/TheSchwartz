@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 6;
 
 run_tests(2, sub {
@@ -27,10 +27,10 @@ run_tests(2, sub {
 
 ############################################################################
 package Worker::Dummy;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
-    my $subjob = TheSchwartz::Job->new(
+    my $subjob = Enegger::Job->new(
                                        funcname => 'Worker::Dummy2',
                                        );
     $job->replace_with($subjob);
@@ -42,14 +42,14 @@ sub retry_delay { 5 }
 
 
 package Worker::Dummy2;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;
 }
 
 package Worker::Dummy3;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;

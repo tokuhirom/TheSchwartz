@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 12;
 
 run_tests(4, sub {
@@ -55,7 +55,7 @@ run_tests(4, sub {
 sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
 
 package Worker::Foo;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;

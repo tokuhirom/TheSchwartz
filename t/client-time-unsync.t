@@ -17,7 +17,7 @@ no warnings 'redefine';
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 2;
 
 # how we keep track of if job was done twice:  signal from children back up to us
@@ -92,7 +92,7 @@ sub work {
 
 ############################################################################
 package Worker::Addition;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

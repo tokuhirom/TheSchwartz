@@ -1,19 +1,19 @@
 # $Id$
 
-package TheSchwartz::JobHandle;
+package Enegger::JobHandle;
 use strict;
 use base qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw( dsn_hashed jobid client ));
 
-use TheSchwartz::ExitStatus;
-use TheSchwartz::Job;
+use Enegger::ExitStatus;
+use Enegger::Job;
 
 sub new_from_string {
     my $class = shift;
     my($hstr) = @_;
     my($hashdsn, $jobid) = split /\-/, $hstr, 2;
-    return TheSchwartz::JobHandle->new({
+    return Enegger::JobHandle->new({
             dsn_hashed => $hashdsn,
             jobid      => $jobid,
         });
@@ -47,14 +47,14 @@ sub is_pending {
 sub exit_status {
     my $handle = shift;
     my $status = $handle->driver->lookup(
-            'TheSchwartz::ExitStatus' => $handle->jobid
+            'Enegger::ExitStatus' => $handle->jobid
         ) or return;
     return $status->status;
 }
 
 sub failure_log {
     my $handle = shift;
-    my @failures = $handle->driver->search('TheSchwartz::Error' =>
+    my @failures = $handle->driver->search('Enegger::Error' =>
             { jobid => $handle->jobid },
         );
     return map { $_->message } @failures;

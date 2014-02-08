@@ -1,6 +1,6 @@
 # $Id$
 
-package TheSchwartz::Error;
+package Enegger::Error;
 use strict;
 use base qw( Data::ObjectDriver::BaseObject );
 

@@ -8,10 +8,10 @@ use FindBin;
 use JSON::Any;
 
 use lib "$ENV{HOME}/hack/Data-ObjectDriver/lib";
-use lib "$ENV{HOME}/hack/TheSchwartz/lib";
+use lib "$ENV{HOME}/hack/Enegger/lib";
 use lib "$ENV{HOME}/hack/gearman/api/perl/Gearman/lib";
 use lib "$ENV{HOME}/cvs/Data-ObjectDriver/lib";
-use lib "$ENV{HOME}/cvs/TheSchwartz/lib";
+use lib "$ENV{HOME}/cvs/Enegger/lib";
 use lib "$ENV{HOME}/cvs/gearman/api/perl/Gearman/lib";
 
 sub json {
@@ -35,7 +35,7 @@ sub test_client {
         setup_dbs({ prefix => $pfx }, $dbs);
     }
 
-    return TheSchwartz->new(databases => [
+    return Enegger->new(databases => [
                                           map { {
                                               dsn  => dsn_for($_),
                                               user => "root",

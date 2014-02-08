@@ -1,6 +1,6 @@
 # $Id$
 
-package TheSchwartz;
+package Enegger;
 use strict;
 use fields qw( databases retry_seconds dead_dsns retry_at funcmap_cache verbose all_abilities current_abilities current_job cached_drivers driver_cache_expiration scoreboard prioritize );
 
@@ -11,9 +11,9 @@ use Data::ObjectDriver::Errors;
 use Data::ObjectDriver::Driver::DBI;
 use Digest::MD5 qw( md5_hex );
 use List::Util qw( shuffle );
-use TheSchwartz::FuncMap;
-use TheSchwartz::Job;
-use TheSchwartz::JobHandle;
+use Enegger::FuncMap;
+use Enegger::Job;
+use Enegger::JobHandle;
 
 use constant RETRY_DEFAULT => 30;
 use constant OK_ERRORS => { map { $_ => 1 } Data::ObjectDriver::Errors->UNIQUE_CONSTRAINT, };
@@ -26,7 +26,7 @@ our $T_LOST_RACE;
 our $FIND_JOB_BATCH_SIZE = 50;
 
 sub new {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my %args = @_;
     $client = fields::new($client) unless ref $client;
 
@@ -51,13 +51,13 @@ sub new {
 }
 
 sub debug {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     return unless $client->{verbose};
     $client->{verbose}->(@_);  # ($msg, $job)   but $job is optional
 }
 
 sub hash_databases {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($list) = @_;
     for my $ref (@$list) {
         my $var;
@@ -76,7 +76,7 @@ sub hash_databases {
 }
 
 sub driver_for {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($hashdsn) = @_;
     my $driver;
     my $t = time;
@@ -106,14 +106,14 @@ sub driver_for {
 }
 
 sub mark_database_as_dead {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($hashdsn) = @_;
     $client->{dead_dsns}{$hashdsn} = 1;
     $client->{retry_at}{$hashdsn} = time + $client->{retry_seconds};
 }
 
 sub is_database_dead {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($hashdsn) = @_;
     ## If this database is marked as dead, check the retry time. If
     ## it has passed, try the database again to see if it's undead.
@@ -130,12 +130,12 @@ sub is_database_dead {
 }
 
 sub lookup_job {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $handle = $client->handle_from_string(@_);
     my $driver = $client->driver_for($handle->dsn_hashed);
 
     my $id = $handle->jobid;
-    my $job = $driver->lookup('TheSchwartz::Job' => $handle->jobid)
+    my $job = $driver->lookup('Enegger::Job' => $handle->jobid)
         or return;
 
     $job->handle($handle);
@@ -144,7 +144,7 @@ sub lookup_job {
 }
 
 sub list_jobs {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $arg = shift;
     my @options;
     push @options, run_after     => { op => '<=', value => $arg->{run_after} }     if exists $arg->{run_after};
@@ -173,14 +173,14 @@ sub list_jobs {
 
         if ($arg->{want_handle}) {
             push @jobs, map {
-                my $handle = TheSchwartz::JobHandle->new({
+                my $handle = Enegger::JobHandle->new({
                     dsn_hashed => $hashdsn,
                     client     => $client,
                     jobid      => $_->jobid
                     });
                 $_->handle($handle);
                 $_;
-            } $driver->search('TheSchwartz::Job' => {
+            } $driver->search('Enegger::Job' => {
                 funcid        => $funcid,
                 @options
                 }, { limit => $limit,
@@ -188,7 +188,7 @@ sub list_jobs {
                     direction => 'descend' ) : () )
                 });
         } else {
-            push @jobs, $driver->search('TheSchwartz::Job' => {
+            push @jobs, $driver->search('Enegger::Job' => {
                 funcid        => $funcid,
                 @options
                 }, { limit => $limit,
@@ -202,19 +202,19 @@ sub list_jobs {
 }
 
 sub find_job_with_coalescing_prefix {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my ($funcname, $coval) = @_;
     $coval .= "%";
     return $client->_find_job_with_coalescing('LIKE', $funcname, $coval);
 }
 
 sub find_job_with_coalescing_value {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     return $client->_find_job_with_coalescing('=', @_);
 }
 
 sub _find_job_with_coalescing {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my ($op, $funcname, $coval) = @_;
 
     for my $hashdsn ($client->shuffled_databases) {
@@ -233,7 +233,7 @@ sub _find_job_with_coalescing {
             ##    in the past).
             my $funcid = $client->funcname_to_id($driver, $hashdsn, $funcname);
 
-            @jobs = $driver->search('TheSchwartz::Job' => {
+            @jobs = $driver->search('Enegger::Job' => {
                     funcid        => $funcid,
                     run_after     => \ "<= $unixtime",
                     grabbed_until => \ "<= $unixtime",
@@ -256,7 +256,7 @@ sub _find_job_with_coalescing {
 }
 
 sub find_job_for_workers {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($worker_classes) = @_;
     $worker_classes ||= $client->{current_abilities};
 
@@ -277,7 +277,7 @@ sub find_job_for_workers {
             my @ids = map { $client->funcname_to_id($driver, $hashdsn, $_) }
                       @$worker_classes;
 
-            @jobs = $driver->search('TheSchwartz::Job' => {
+            @jobs = $driver->search('Enegger::Job' => {
                     funcid        => \@ids,
                     run_after     => \ "<= $unixtime",
                     grabbed_until => \ "<= $unixtime",
@@ -302,14 +302,14 @@ sub find_job_for_workers {
 }
 
 sub get_server_time {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($driver) = @_;
     my $unixtime_sql = $driver->dbd->sql_for_unixtime;
     return $driver->rw_handle->selectrow_array("SELECT $unixtime_sql");
 }
 
 sub _grab_a_job {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $hashdsn = shift;
     my $driver = $client->driver_for($hashdsn);
 
@@ -340,7 +340,7 @@ sub _grab_a_job {
         }
 
         ## Now prepare the job, and return it.
-        my $handle = TheSchwartz::JobHandle->new({
+        my $handle = Enegger::JobHandle->new({
             dsn_hashed => $hashdsn,
             jobid      => $job->jobid,
         });
@@ -354,7 +354,7 @@ sub _grab_a_job {
 
 
 sub shuffled_databases {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my @dsns = keys %{ $client->{databases} };
     return shuffle(@dsns);
 }
@@ -369,7 +369,7 @@ sub insert_job_to_driver {
         $job->funcid( $client->funcname_to_id($driver, $hashdsn, $job->funcname) );
 
         ## This is sub-optimal because of clock skew, but something is
-        ## better than a NULL value. And currently, nothing in TheSchwartz
+        ## better than a NULL value. And currently, nothing in Enegger
         ## code itself uses insert_time. TODO: use server time, but without
         ## having to do a roundtrip just to get the server time.
         $job->insert_time(time);
@@ -384,7 +384,7 @@ sub insert_job_to_driver {
     } elsif ($job->jobid) {
         ## We inserted the job successfully!
         ## Attach a handle to the job, and return the handle.
-        my $handle = TheSchwartz::JobHandle->new({
+        my $handle = Enegger::JobHandle->new({
                 dsn_hashed => $hashdsn,
                 client     => $client,
                 jobid      => $job->jobid
@@ -396,7 +396,7 @@ sub insert_job_to_driver {
 }
 
 sub insert_jobs {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my (@jobs) = @_;
 
     ## Try each of the databases that are registered with $client, in
@@ -428,13 +428,13 @@ sub insert_jobs {
 }
 
 sub insert {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $job = shift;
-    if (ref($_[0]) eq "TheSchwartz::Job") {
+    if (ref($_[0]) eq "Enegger::Job") {
         croak "Can't insert multiple jobs with method 'insert'\n";
     }
-    unless (ref($job) eq 'TheSchwartz::Job') {
-        $job = TheSchwartz::Job->new_from_array($job, $_[0]);
+    unless (ref($job) eq 'Enegger::Job') {
+        $job = Enegger::Job->new_from_array($job, $_[0]);
     }
 
     ## Try each of the databases that are registered with $client, in
@@ -456,21 +456,21 @@ sub insert {
 }
 
 sub handle_from_string {
-    my TheSchwartz $client = shift;
-    my $handle = TheSchwartz::JobHandle->new_from_string(@_);
+    my Enegger $client = shift;
+    my $handle = Enegger::JobHandle->new_from_string(@_);
     $handle->client($client);
     return $handle;
 }
 
 sub can_do {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($class) = @_;
     push @{ $client->{all_abilities} }, $class;
     push @{ $client->{current_abilities} }, $class;
 }
 
 sub reset_abilities {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     $client->{all_abilities} = [];
     $client->{current_abilities} = [];
 }
@@ -492,7 +492,7 @@ sub temporarily_remove_ability {
 }
 
 sub work_on {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $hstr = shift;  # Handle string
     my $job = $client->lookup_job($hstr) or
         return 0;
@@ -500,7 +500,7 @@ sub work_on {
 }
 
 sub grab_and_work_on {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $hstr = shift;  # Handle string
     my $job = $client->lookup_job($hstr) or
         return 0;
@@ -519,7 +519,7 @@ sub grab_and_work_on {
 }
 
 sub work {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($delay) = @_;
     $delay ||= 5;
     while (1) {
@@ -528,7 +528,7 @@ sub work {
 }
 
 sub work_until_done {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     while (1) {
         $client->work_once or last;
     }
@@ -536,7 +536,7 @@ sub work_until_done {
 
 ## Returns true if it did something, false if no jobs were found
 sub work_once {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $job = shift;  # optional specific job to work on
 
     ## Look for a job with our current set of abilities. Note that the
@@ -555,9 +555,9 @@ sub work_once {
     my $class = $job ? $job->funcname : undef;
     if ($job) {
         my $priority = $job->priority ? ", priority " . $job->priority : "";
-        $job->debug("TheSchwartz::work_once got job of class '$class'$priority");
+        $job->debug("Enegger::work_once got job of class '$class'$priority");
     } else {
-        $client->debug("TheSchwartz::work_once found no jobs");
+        $client->debug("Enegger::work_once found no jobs");
     }
 
     ## If we still don't have anything, return.
@@ -577,18 +577,18 @@ sub work_once {
 }
 
 sub funcid_to_name {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($driver, $hashdsn, $funcid) = @_;
     my $cache = $client->_funcmap_cache($hashdsn);
     return $cache->{funcid2name}{$funcid};
 }
 
 sub funcname_to_id {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($driver, $hashdsn, $funcname) = @_;
     my $cache = $client->_funcmap_cache($hashdsn);
     unless (exists $cache->{funcname2id}{$funcname}) {
-        my $map = TheSchwartz::FuncMap->create_or_find($driver, $funcname);
+        my $map = Enegger::FuncMap->create_or_find($driver, $funcname);
         $cache->{funcname2id}{ $map->funcname } = $map->funcid;
         $cache->{funcid2name}{ $map->funcid }   = $map->funcname;
     }
@@ -596,11 +596,11 @@ sub funcname_to_id {
 }
 
 sub _funcmap_cache {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my($hashdsn) = @_;
     unless (exists $client->{funcmap_cache}{$hashdsn}) {
         my $driver = $client->driver_for($hashdsn);
-        my @maps = $driver->search('TheSchwartz::FuncMap');
+        my @maps = $driver->search('Enegger::FuncMap');
         my $cache = { funcname2id => {}, funcid2name => {} };
         for my $map (@maps) {
             $cache->{funcname2id}{ $map->funcname } = $map->funcid;
@@ -614,12 +614,12 @@ sub _funcmap_cache {
 # accessors
 
 sub verbose {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     return $client->{verbose};
 }
 
 sub set_verbose {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my $logger = shift;   # or non-coderef to just print to stderr
     if ($logger && ref $logger ne "CODE") {
         $logger = sub {
@@ -632,13 +632,13 @@ sub set_verbose {
 }
 
 sub scoreboard {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
 
     return $client->{scoreboard};
 }
 
 sub set_scoreboard {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     my ($dir) = @_;
 
     return unless $dir;
@@ -661,7 +661,7 @@ sub set_scoreboard {
 }
 
 sub start_scoreboard {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
 
     # Don't do anything if we're not configured to write to the scoreboard
     my $scoreboard = $client->scoreboard;
@@ -707,7 +707,7 @@ sub _serialize_args {
 }
 
 sub end_scoreboard {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
 
     # Don't do anything if we're not configured to write to the scoreboard
     my $scoreboard = $client->scoreboard;
@@ -724,7 +724,7 @@ sub end_scoreboard {
 }
 
 sub clean_scoreboard {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
 
     # Don't do anything if we're not configured to write to the scoreboard
     my $scoreboard = $client->scoreboard;
@@ -734,30 +734,30 @@ sub clean_scoreboard {
 }
 
 sub prioritize {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     return $client->{prioritize};
 }
 
 sub set_prioritize {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     $client->{prioritize} = shift;
 }
 
 # current job being worked.  so if something dies, work_safely knows which to mark as dead.
 sub current_job {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     $client->{current_job};
 }
 
 sub set_current_job {
-    my TheSchwartz $client = shift;
+    my Enegger $client = shift;
     $client->{current_job} = shift;
 }
 
 DESTROY {
     foreach my $arg (@_) {
-        # Call 'clean_scoreboard' on TheSchwartz objects
-        if (ref($arg) and $arg->isa('TheSchwartz')) {
+        # Call 'clean_scoreboard' on Enegger objects
+        if (ref($arg) and $arg->isa('Enegger')) {
             $arg->clean_scoreboard;
         }
     }
@@ -769,7 +769,7 @@ __END__
 
 =head1 NAME
 
-TheSchwartz - reliable job queue
+Enegger - reliable job queue
 
 =head1 SYNOPSIS
 
@@ -779,18 +779,18 @@ TheSchwartz - reliable job queue
     sub work_asynchronously {
         my %args = @_;
 
-        my $client = TheSchwartz->new( databases => $DATABASE_INFO );
+        my $client = Enegger->new( databases => $DATABASE_INFO );
         $client->insert('MyWorker', \%args);
     }
 
 
     # myworker.pl
     package MyWorker;
-    use base qw( TheSchwartz::Worker );
+    use base qw( Enegger::Worker );
 
     sub work {
         my $class = shift;
-        my TheSchwartz::Job $job = shift;
+        my Enegger::Job $job = shift;
 
         print "Workin' hard or hardly workin'? Hyuk!!\n";
 
@@ -799,29 +799,29 @@ TheSchwartz - reliable job queue
 
     package main;
 
-    my $client = TheSchwartz->new( databases => $DATABASE_INFO );
+    my $client = Enegger->new( databases => $DATABASE_INFO );
     $client->can_do('MyWorker');
     $client->work();
 
 
 =head1 DESCRIPTION
 
-TheSchwartz is a reliable job queue system. Your application can put jobs into
+Enegger is a reliable job queue system. Your application can put jobs into
 the system, and your worker processes can pull jobs from the queue atomically
 to perform. Failed jobs can be left in the queue to retry later.
 
 I<Abilities> specify what jobs a worker process can perform. Abilities are the
-names of C<TheSchwartz::Worker> subclasses, as in the synopsis: the C<MyWorker>
+names of C<Enegger::Worker> subclasses, as in the synopsis: the C<MyWorker>
 class name is used to specify that the worker script can perform the job. When
-using the C<TheSchwartz> client's C<work> functions, the class-ability duality
+using the C<Enegger> client's C<work> functions, the class-ability duality
 is used to automatically dispatch to the proper class to do the actual work.
 
-TheSchwartz clients will also prefer to do jobs for unused abilities before
+Enegger clients will also prefer to do jobs for unused abilities before
 reusing a particular ability, to avoid exhausting the supply of one kind of job
 while jobs of other types stack up.
 
 Some jobs with high setup times can be performed more efficiently if a group of
-related jobs are performed together. TheSchwartz offers a facility to
+related jobs are performed together. Enegger offers a facility to
 I<coalesce> jobs into groups, which a properly constructed worker can find and
 perform at once. For example, if your worker were delivering email, you might
 store the domain name from the recipient's address as the coalescing value. The
@@ -830,7 +830,7 @@ domain once it connects to that domain's mail server.
 
 =head1 USAGE
 
-=head2 C<TheSchwartz-E<gt>new( %args )>
+=head2 C<Enegger-E<gt>new( %args )>
 
 Optional members of C<%args> are:
 
@@ -838,7 +838,7 @@ Optional members of C<%args> are:
 
 =item * C<databases>
 
-An arrayref of database information. TheSchwartz workers can use multiple
+An arrayref of database information. Enegger workers can use multiple
 databases, such that if any of them are unavailable, the worker will search for
 appropriate jobs in the other databases automatically.
 
@@ -896,14 +896,14 @@ connection set-up and tear-down time.
 =item * C<retry_seconds>
 
 The number of seconds after which to try reconnecting to apparently dead
-databases. If not given, TheSchwartz will retry connecting to databases after
+databases. If not given, Enegger will retry connecting to databases after
 30 seconds.
 
 =back
 
 =head2 C<$client-E<gt>list_jobs( %args )>
 
-Returns a list of C<TheSchwartz::Job> objects matching the given arguments. The
+Returns a list of C<Enegger::Job> objects matching the given arguments. The
 required members of C<%args> are:
 
 =over 4
@@ -943,7 +943,7 @@ returns as many jobs as there is up to amount of databases * FIND_JOB_BATCH_SIZE
 
 =head2 C<$client-E<gt>lookup_job( $handle_id )>
 
-Returns a C<TheSchwartz::Job> corresponding to the given handle ID.
+Returns a C<Enegger::Job> corresponding to the given handle ID.
 
 =head2 C<$client-E<gt>set_verbose( $verbose )>
 
@@ -953,12 +953,12 @@ disables logging.
 
 =head1 POSTING JOBS
 
-The methods of TheSchwartz clients used by applications posting jobs to the
+The methods of Enegger clients used by applications posting jobs to the
 queue are:
 
 =head2 C<$client-E<gt>insert( $job )>
 
-Adds the given C<TheSchwartz::Job> to one of the client's job databases.
+Adds the given C<Enegger::Job> to one of the client's job databases.
 
 =head2 C<$client-E<gt>insert( $funcname, $arg )>
 
@@ -966,7 +966,7 @@ Adds a new job with funcname C<$funcname> and arguments C<$arg> to the queue.
 
 =head2 C<$client-E<gt>insert_jobs( @jobs )>
 
-Adds the given C<TheSchwartz::Job> objects to one of the client's job
+Adds the given C<Enegger::Job> objects to one of the client's job
 databases. All the given jobs are recorded in I<one> job database.
 
 =head2 C<$client-E<gt>set_prioritize( $prioritize )>
@@ -975,7 +975,7 @@ Set the C<prioritize> value as described in the constructor.
 
 =head1 WORKING
 
-The methods of TheSchwartz clients for use in worker processes are:
+The methods of Enegger clients for use in worker processes are:
 
 =head2 C<$client-E<gt>can_do( $ability )>
 
@@ -1013,21 +1013,21 @@ on it.
 
 =head2 C<$client-E<gt>find_job_for_workers( [$abilities] )>
 
-Returns a C<TheSchwartz::Job> for a random job that the client can do. If
+Returns a C<Enegger::Job> for a random job that the client can do. If
 specified, the job returned matches one of the abilities in the arrayref
 C<$abilities>, rather than C<$client>'s abilities.
 
 =head2 C<$client-E<gt>find_job_with_coalescing_value( $ability, $coval )>
 
-Returns a C<TheSchwartz::Job> for a random job for a worker capable of
+Returns a C<Enegger::Job> for a random job for a worker capable of
 C<$ability> and with a coalescing value of C<$coval>.
 
 =head2 C<$client-E<gt>find_job_with_coalescing_prefix( $ability, $coval )>
 
-Returns a C<TheSchwartz::Job> for a random job for a worker capable of
+Returns a C<Enegger::Job> for a random job for a worker capable of
 C<$ability> and with a coalescing value beginning with C<$coval>.
 
-Note the C<TheSchwartz> implementation of this function uses a C<LIKE> query to
+Note the C<Enegger> implementation of this function uses a C<LIKE> query to
 find matching jobs, with all the attendant performance implications for your
 job databases.
 
@@ -1037,17 +1037,17 @@ Given an open driver I<$driver> to a database, gets the current server time from
 
 =head1 THE SCOREBOARD
 
-The scoreboards can be used to monitor what the TheSchwartz::Worker subclasses are
+The scoreboards can be used to monitor what the Enegger::Worker subclasses are
 currently working on.  Once the scoreboard has been enabled in the workers with
-C<set_scoreboard> method the C<thetop> utility (shipped with TheSchwartz distribuition
+C<set_scoreboard> method the C<thetop> utility (shipped with Enegger distribuition
 in the C<extras> directory) can be used to list all current jobs being worked on.
 
 =head2 C<< $client->set_scoreboard( $dir ) >>
 
-Enables the scoreboard.  Setting this to C<1> or C<on> will cause TheSchwartz to create
+Enables the scoreboard.  Setting this to C<1> or C<on> will cause Enegger to create
 a scoreboard file in a location it determines is optimal.
 
-Passing in any other option sets the directory the TheSchwartz scoreboard directory should
+Passing in any other option sets the directory the Enegger scoreboard directory should
 be created in.  For example, if you set this to C</tmp> then this would create a directory
 called C</tmp/theschwartz> and a scoreboard file C</tmp/theschwartz/scoreboard.pid> in it
 (where pid is the current process pid.) 
@@ -1069,7 +1069,7 @@ the worker in work_safely once work has been completed)
 =head2 C<< $client->clean_scoreboard() >>
 
 Removes the scoreboard file (but not the scoreboard directory.)  Automatically
-called by TheSchwartz during object destruction (i.e. when the instance goes
+called by Enegger during object destruction (i.e. when the instance goes
 out of scope)
 
 =head1 PASSING IN AN EXISTING DRIVER
@@ -1083,7 +1083,7 @@ to reuse exist Database handles like so:
                 AutoCommit => 1,
             } ) or die $DBI::errstr;
         my $driver = Data::ObjectDriver::Driver::DBI->new( dbh => $dbh);
-        return TheSchwartz->new(databases => [{ driver => $driver }]);
+        return Enegger->new(databases => [{ driver => $driver }]);
 
 B<Note>: it's important that the C<RaiseError> and C<AutoCommit> flags are 
 set on the handle for various bits of functionality to work.
@@ -1093,7 +1093,7 @@ set on the handle for various bits of functionality to work.
 This software is Copyright 2007, Six Apart Ltd, cpan@sixapart.com. All
 rights reserved.
 
-TheSchwartz is free software; you may redistribute it and/or modify it
+Enegger is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
 
 TheScwhartz comes with no warranty of any kind.

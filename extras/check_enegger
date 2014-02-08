@@ -39,7 +39,7 @@ USAGE
 sub exit_with {
     my($code, $msg) = @_;
     $msg = $msg ? ' - ' . $msg : '';
-    print "TheSchwartz $dsn $code$msg";
+    print "Enegger $dsn $code$msg";
     exit $ERRORS{$code};
 }
 

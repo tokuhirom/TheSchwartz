@@ -1,12 +1,12 @@
 -- From: Michael Zedeler <michael@zedeler.dk>
 -- Date: July 30, 2007 7:31:55 AM PDT
 -- To: cpan@sixapart.com
--- Subject: TheSchwartz database schema for postgresql
+-- Subject: Enegger database schema for postgresql
 --
 -- Hi.
 --
 -- I couldn't find any useful postgresql compatible schema file for  
--- the tables that TheSchwartz seems to depend on, so I rewrote the  
+-- the tables that Enegger seems to depend on, so I rewrote the  
 -- one supplied in the package.
 --
 -- Here it is. Feel free to include it in the next release.

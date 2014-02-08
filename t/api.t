@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 54*3;
 
 run_tests(54, sub {
@@ -19,7 +19,7 @@ run_tests(54, sub {
         my $handle;
 
         $handle = $client->insert("feedmajor", { scoops => 2, with => ['cheese','love'] });
-        isa_ok $handle, 'TheSchwartz::JobHandle', "inserted job";
+        isa_ok $handle, 'Enegger::JobHandle', "inserted job";
         is($handle->is_pending, 1, "job is still pending");
         is($handle->exit_status, undef, "job hasn't exitted yet");
 
@@ -28,7 +28,7 @@ run_tests(54, sub {
         ok($hstr, "handle stringifies");
 
         my $job = $handle->job;
-        isa_ok $job, 'TheSchwartz::Job';
+        isa_ok $job, 'Enegger::Job';
         is $job->funcname, 'feedmajor', 'handle->job gives us the right job';
         cmp_ok $job->insert_time, '>', 0, 'insert_time is non-zero';
 
@@ -39,10 +39,10 @@ run_tests(54, sub {
         is($handle->exit_status, undef, "job hasn't exitted yet");
 
         $job = $handle->job;
-        isa_ok $job, 'TheSchwartz::Job';
+        isa_ok $job, 'Enegger::Job';
         is $job->funcname, 'feedmajor', 'recreated handle gives us the right job';
 
-        $job = TheSchwartz::Job->new(
+        $job = Enegger::Job->new(
                                      funcname => 'feedmajor',
                                      run_after=> time() + 60,
                                      priority => 7,
@@ -53,38 +53,38 @@ run_tests(54, sub {
         ok($job);
 
         $handle = $client->insert($job);
-        isa_ok $handle, 'TheSchwartz::JobHandle';
+        isa_ok $handle, 'Enegger::JobHandle';
 
         # inserting multiple at a time in scalar context
         {
-            my $job1 = TheSchwartz::Job->new(funcname => 'feedmajor');
-            my $job2 = TheSchwartz::Job->new(funcname => 'feedmajor');
+            my $job1 = Enegger::Job->new(funcname => 'feedmajor');
+            my $job2 = Enegger::Job->new(funcname => 'feedmajor');
             my $rv = $client->insert_jobs($job1, $job2);
             is($rv, 2, "inserted two jobs");
         }
 
         # inserting multiple at a time in list context
         {
-            my $job1 = TheSchwartz::Job->new(funcname => 'feedmajor');
-            my $job2 = TheSchwartz::Job->new(funcname => 'feedmajor');
+            my $job1 = Enegger::Job->new(funcname => 'feedmajor');
+            my $job2 = Enegger::Job->new(funcname => 'feedmajor');
             my @handles = $client->insert_jobs($job1, $job2);
             is(scalar @handles, 2, "inserted two jobs");
-            isa_ok $handles[0], 'TheSchwartz::JobHandle', "got job handle";
+            isa_ok $handles[0], 'Enegger::JobHandle', "got job handle";
         }
 
         # inserting with a regular scalar arg
         {
-            $job = TheSchwartz::Job->new(
+            $job = Enegger::Job->new(
                                          funcname => 'feedmajor',
                                          arg      => "gruel that's longer than 11 bytes, for sure!",
                                          );
             ok($job);
             $handle = $client->insert($job);
-            isa_ok $handle, 'TheSchwartz::JobHandle';
+            isa_ok $handle, 'Enegger::JobHandle';
             
             my $same = $client->lookup_job($handle->as_string);
             ok $same;
-            isa_ok $same, 'TheSchwartz::Job';
+            isa_ok $same, 'Enegger::Job';
             is $same->handle->as_string, $handle->as_string;
             
         }
@@ -97,16 +97,16 @@ run_tests(54, sub {
 
         # inserting multiple with wrong method fails
         eval {
-            my $job1 = TheSchwartz::Job->new(funcname => 'feedmajor');
-            my $job2 = TheSchwartz::Job->new(funcname => 'feedmajor');
+            my $job1 = Enegger::Job->new(funcname => 'feedmajor');
+            my $job2 = Enegger::Job->new(funcname => 'feedmajor');
             my @handles = $client->insert($job1, $job2);
         };
         like($@, qr/multiple jobs with method/, "used wrong method");
 
         # insert multiple that fail
         {
-            my $job1 = TheSchwartz::Job->new(funcname => 'feedmajor', uniqkey => 'u1');
-            my $job2 = TheSchwartz::Job->new(funcname => 'feedmajor', uniqkey => 'u1');
+            my $job1 = Enegger::Job->new(funcname => 'feedmajor', uniqkey => 'u1');
+            my $job2 = Enegger::Job->new(funcname => 'feedmajor', uniqkey => 'u1');
             my @handles = $client->insert_jobs($job1, $job2);
             is(scalar @handles, 0, "failed to insert anything");
         }

@@ -5,7 +5,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 30;
 
 run_tests(10, sub {
@@ -34,7 +34,7 @@ run_tests(10, sub {
 
 ############################################################################
 package Worker::Foo;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 use Test::More;  ## Import test methods.
 
@@ -46,7 +46,7 @@ sub work {
         ok(1, "got the expand job");
         my @jobs;
         for (1..5) {
-            push @jobs, TheSchwartz::Job->new_from_array("Worker::Foo",
+            push @jobs, Enegger::Job->new_from_array("Worker::Foo",
                     { cluster => $_ }
                 );
         }

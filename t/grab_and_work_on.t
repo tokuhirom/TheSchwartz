@@ -5,17 +5,17 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 27;
 
 run_tests(9, sub {
     my $client = test_client(dbs => ['ts1']);
 
-    my $available = TheSchwartz::Job->new(
+    my $available = Enegger::Job->new(
         funcname => 'Worker::Grabber',
     );
     my $grabbed_until = time + 2;
-    my $grabbed = TheSchwartz::Job->new(
+    my $grabbed = Enegger::Job->new(
         funcname => 'Worker::Grabber',
         grabbed_until => $grabbed_until,
     );
@@ -46,7 +46,7 @@ run_tests(9, sub {
 
 ############################################################################
 package Worker::Grabber;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 use Test::More;
 
 my $client;

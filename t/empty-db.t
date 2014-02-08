@@ -6,13 +6,13 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 9;
 
 run_tests(3, sub {
     teardown_dbs("tempty1");
 
-    my $client = TheSchwartz->new(databases => [
+    my $client = Enegger->new(databases => [
                                                 {
                                                     dsn  => dsn_for('tempty1'),
                                                     user => $ENV{TS_DB_USER},

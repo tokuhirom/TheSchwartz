@@ -3,8 +3,8 @@
 use 5.008;
 use inc::Module::Install;
 
-name('TheSchwartz');
-version_from('lib/TheSchwartz.pm');
+name('Enegger');
+version_from('lib/Enegger.pm');
 author('Six Apart <cpan@sixapart.com>');
 license('perl');
 build_requires 'Test::More', 0.88;

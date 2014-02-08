@@ -7,7 +7,7 @@ require 't/lib/db-common.pl';
 
 use Test::More tests => 30;
 
-use TheSchwartz;
+use Enegger;
 use File::Spec qw();
 use File::Temp qw(tempdir);
 # create a tmp directory with a unique name.  This stops
@@ -21,7 +21,7 @@ run_tests(10, sub {
 
     setup_dbs({prefix => $pfx}, $dbs);
 
-    my $client = TheSchwartz->new(scoreboard => $tempdir,
+    my $client = Enegger->new(scoreboard => $tempdir,
                                   databases => [
                                           map { {
                                               dsn  => dsn_for($_),
@@ -73,7 +73,7 @@ run_tests(10, sub {
 
 ############################################################################
 package Worker::Addition;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

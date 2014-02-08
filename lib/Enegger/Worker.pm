@@ -1,6 +1,6 @@
 # $Id$
 
-package TheSchwartz::Worker;
+package Enegger::Worker;
 use strict;
 
 use Carp qw( croak );
@@ -52,16 +52,16 @@ __END__
 
 =head1 NAME
 
-TheSchwartz::Worker - superclass for defining task behavior
+Enegger::Worker - superclass for defining task behavior
 
 =head1 SYNOPSIS
 
     package MyWorker;
-    use base qw( TheSchwartz::Worker );
+    use base qw( Enegger::Worker );
 
     sub work {
         my $class = shift;
-        my TheSchwartz::Job $job = shift;
+        my Enegger::Job $job = shift;
 
         print "Workin' hard or hardly workin'? Hyuk!!\n";
 
@@ -71,22 +71,22 @@ TheSchwartz::Worker - superclass for defining task behavior
 
     package main;
     
-    my $client = TheSchwartz->new( databases => $DATABASE_INFO );
+    my $client = Enegger->new( databases => $DATABASE_INFO );
     $client->can_do('MyWorker');
     $client->work();
 
 =head1 DESCRIPTION
 
-I<TheSchwartz::Worker> objects are the salt of the reliable job queuing earth.
+I<Enegger::Worker> objects are the salt of the reliable job queuing earth.
 The behavior required to perform posted jobs are defined in subclasses of
-I<TheSchwartz::Worker>. These subclasses are named for the ability required of
-a C<TheSchwartz> client to do the job, so that the clients can dispatch
+I<Enegger::Worker>. These subclasses are named for the ability required of
+a C<Enegger> client to do the job, so that the clients can dispatch
 automatically to the approprate worker routine.
 
 Because jobs can be performed by any machine running code for capable worker
-classes, C<TheSchwartz::Worker>s are generally stateless. All mutable state is
-stored in the C<TheSchwartz::Job> objects. This means all
-C<TheSchwartz::Worker> methods are I<class> methods, and C<TheSchwartz::Worker>
+classes, C<Enegger::Worker>s are generally stateless. All mutable state is
+stored in the C<Enegger::Job> objects. This means all
+C<Enegger::Worker> methods are I<class> methods, and C<Enegger::Worker>
 classes are generally never instantiated.
 
 =head1 SUBCLASSING
@@ -100,13 +100,13 @@ Performs the job that required ability C<$class>. Override this method to
 define how to do the job you're defining.
 
 Note that will need to call C<$job-E<gt>completed()> or C<$job-E<gt>failed()>
-as appropriate to indicate success or failure. See L<TheSchwartz::Job>.
+as appropriate to indicate success or failure. See L<Enegger::Job>.
 
 =head2 C<$class-E<gt>max_retries( $job )>
 
 Returns the number of times workers should attempt the given job. After this
 many tries, the job is marked as completed with errors (that is, a
-C<TheSchwartz::ExitStatus> is recorded for it) and removed from the queue. By
+C<Enegger::ExitStatus> is recorded for it) and removed from the queue. By
 default, returns 0.
 
 =head2 C<$class-E<gt>retry_delay( $num_failures )>
@@ -117,7 +117,7 @@ returns 0.
 
 =head2 C<$class-E<gt>keep_exit_status_for()>
 
-Returns the number of seconds to allow a C<TheSchwartz::ExitStatus> record for
+Returns the number of seconds to allow a C<Enegger::ExitStatus> record for
 a job performed by this worker class to exist. By default, returns 0.
 
 =head2 C<$class-E<gt>grab_for()>
@@ -132,7 +132,7 @@ immediate retry after a delay indicated by C<retry_delay()>.
 
 =head2 C<$class-E<gt>grab_job( $client )>
 
-Finds and claims a job for workers with ability C<$class>, using C<TheSchwartz>
+Finds and claims a job for workers with ability C<$class>, using C<Enegger>
 client C<$client>. This job can then be passed to C<work()> or C<work_safely()>
 to perform it.
 

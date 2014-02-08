@@ -1,4 +1,4 @@
-FUTURE:  provide HTTP server interface to all TheSchwartz commands.
+FUTURE:  provide HTTP server interface to all Enegger commands.
 
 insert
 insert_jobs

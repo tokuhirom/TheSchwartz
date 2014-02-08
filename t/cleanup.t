@@ -5,12 +5,12 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 30;
 
 # for testing:
-$TheSchwartz::T_EXITSTATUS_CLEAN_THRES = 1;  # delete 100% of the time, not 10% of the time
-$TheSchwartz::T_ERRORS_MAX_AGE = 2;          # keep errors for 3 seconds, not 1 week
+$Enegger::T_EXITSTATUS_CLEAN_THRES = 1;  # delete 100% of the time, not 10% of the time
+$Enegger::T_ERRORS_MAX_AGE = 2;          # keep errors for 3 seconds, not 1 week
 
 run_tests(10, sub {
     my $client = test_client(dbs => ['ts1']);
@@ -21,7 +21,7 @@ run_tests(10, sub {
     # insert a job which will fail, then succeed.
     {
         my $handle = $client->insert("Worker::Fail");
-        isa_ok $handle, 'TheSchwartz::JobHandle', "inserted job";
+        isa_ok $handle, 'Enegger::JobHandle', "inserted job";
 
         $client->work_until_done;
         is($handle->failures, 1, "job has failed once");
@@ -59,7 +59,7 @@ run_tests(10, sub {
 
 ############################################################################
 package Worker::Fail;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;
@@ -76,7 +76,7 @@ sub retry_delay { 1 }
 # ---------------
 
 package Worker::Complete;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 sub work {
     my ($class, $job) = @_;
     $job->completed;

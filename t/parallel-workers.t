@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 2;
 
 # how we keep track of if job was done twice:  signal from children back up to us
@@ -18,14 +18,14 @@ $SIG{USR2} = sub { $lost_race ++; };
 # tell our parent when we lost a race
 {
     no warnings 'once';
-    $TheSchwartz::FIND_JOB_BATCH_SIZE = 2;
+    $Enegger::FIND_JOB_BATCH_SIZE = 2;
 
-    $TheSchwartz::T_LOST_RACE = sub {
+    $Enegger::T_LOST_RACE = sub {
         $lost_race = 1;  # this one's in our child process.
         kill 'USR2', getppid();
     };
 
-    $TheSchwartz::T_AFTER_GRAB_SELECT_BEFORE_UPDATE = sub {
+    $Enegger::T_AFTER_GRAB_SELECT_BEFORE_UPDATE = sub {
         # force the race condition to happen, at least until we've triggered it
         select undef, undef, undef, 0.25
             unless $lost_race;
@@ -91,7 +91,7 @@ sub work {
 
 ############################################################################
 package Worker::Addition;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

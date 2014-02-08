@@ -1,6 +1,6 @@
 # $Id$
 
-package TheSchwartz::FuncMap;
+package Enegger::FuncMap;
 use strict;
 use base qw( Data::ObjectDriver::BaseObject );
 
@@ -18,7 +18,7 @@ sub create_or_find {
 
     ## Attempt to select funcmap record by name. If successful, return
     ## object, otherwise proceed with insertion and return.
-    my ($map) = $driver->search('TheSchwartz::FuncMap' =>
+    my ($map) = $driver->search('Enegger::FuncMap' =>
             { funcname => $funcname }
         );
     return $map if $map;
@@ -33,7 +33,7 @@ sub create_or_find {
     ## in all likelihood, the exception was that the record was added by
     ## another process.
     if (my $err = $@) {
-        ($map) = $driver->search('TheSchwartz::FuncMap' =>
+        ($map) = $driver->search('Enegger::FuncMap' =>
                 { funcname => $funcname }
             ) or croak "Can't find or create funcname $funcname: $err";
     }

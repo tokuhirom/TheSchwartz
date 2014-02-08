@@ -5,7 +5,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 12;
 
 run_tests(4, sub {
@@ -13,7 +13,7 @@ run_tests(4, sub {
 
     my $job2h;
     for (1..2) {
-        my $job = TheSchwartz::Job->new(
+        my $job = Enegger::Job->new(
                                         funcname => 'Worker::CoalesceTest',
                                         arg      => { n => $_ },
                                         coalesce => "a$_",
@@ -40,7 +40,7 @@ run_tests(4, sub {
 
 ############################################################################
 package Worker::CoalesceTest;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 
 sub work {

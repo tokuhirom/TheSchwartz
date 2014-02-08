@@ -1,14 +1,14 @@
 # $Id$
 
-package TheSchwartz::Job;
+package Enegger::Job;
 use strict;
 use base qw( Data::ObjectDriver::BaseObject );
 
 use Carp qw( croak );
 use Storable ();
-use TheSchwartz::Error;
-use TheSchwartz::ExitStatus;
-use TheSchwartz::JobHandle;
+use Enegger::Error;
+use Enegger::ExitStatus;
+use Enegger::JobHandle;
 
 __PACKAGE__->install_properties({
                columns     => [qw(jobid funcid arg uniqkey insert_time
@@ -102,7 +102,7 @@ sub driver {
 sub add_failure {
     my $job = shift;
     my($msg) = @_;
-    my $error = TheSchwartz::Error->new;
+    my $error = Enegger::Error->new;
     $error->error_time(time());
     $error->jobid($job->jobid);
     $error->funcid($job->funcid);
@@ -113,8 +113,8 @@ sub add_failure {
 
     # and let's lazily clean some errors while we're here.
     my $unixtime = $driver->dbd->sql_for_unixtime;
-    my $maxage   = $TheSchwartz::T_ERRORS_MAX_AGE || (86400*7);
-    $driver->remove('TheSchwartz::Error', {
+    my $maxage   = $Enegger::T_ERRORS_MAX_AGE || (86400*7);
+    $driver->remove('Enegger::Error', {
         error_time => \ "< $unixtime - $maxage",
     }, {
         nofetch => 1,
@@ -133,7 +133,7 @@ sub set_exit_status {
     my($exit) = @_;
     my $class = $job->funcname;
     my $secs = $class->keep_exit_status_for or return;
-    my $status = TheSchwartz::ExitStatus->new;
+    my $status = Enegger::ExitStatus->new;
     $status->jobid($job->jobid);
     $status->funcid($job->funcid);
     $status->completion_time(time);
@@ -147,10 +147,10 @@ sub set_exit_status {
     # rather than doing this query all the time, we do it 1/nth of the
     # time, and deleting up to n*10 queries while we're at it.
     # default n is 10% of the time, doing 100 deletes.
-    my $clean_thres = $TheSchwartz::T_EXITSTATUS_CLEAN_THRES || 0.10;
+    my $clean_thres = $Enegger::T_EXITSTATUS_CLEAN_THRES || 0.10;
     if (rand() < $clean_thres) {
         my $unixtime = $driver->dbd->sql_for_unixtime;
-        $driver->remove('TheSchwartz::ExitStatus', {
+        $driver->remove('Enegger::ExitStatus', {
             delete_after => \ "< $unixtime",
         }, {
             nofetch => 1,
@@ -288,7 +288,7 @@ sub replace_with {
     $job->completed;
 
     # for testing
-    if ($TheSchwartz::Job::_T_REPLACE_WITH_FAIL) {
+    if ($Enegger::Job::_T_REPLACE_WITH_FAIL) {
         $driver->rollback;
         die "commit failed for driver: due to testing\n";
     }
@@ -325,16 +325,16 @@ __END__
 
 =head1 NAME
 
-TheSchwartz::Job - jobs for the reliable job queue
+Enegger::Job - jobs for the reliable job queue
 
 =head1 SYNOPSIS
 
-    my $client = TheSchwartz->new( databases => $DATABASE_INFO );
+    my $client = Enegger->new( databases => $DATABASE_INFO );
 
-    my $job = TheSchwartz::Job->new_from_array('MyWorker', [ foo => 'bar' ]);
+    my $job = Enegger::Job->new_from_array('MyWorker', [ foo => 'bar' ]);
     $client->insert($job);
 
-    $job = TheSchwartz::Job->new(
+    $job = Enegger::Job->new(
         funcname => 'MyWorker',
         uniqkey  => 7,
         arg      => [ foo => 'bar' ],
@@ -343,15 +343,15 @@ TheSchwartz::Job - jobs for the reliable job queue
 
 =head1 DESCRIPTION
 
-C<TheSchwartz::Job> models the jobs that are posted to the job queue by your
+C<Enegger::Job> models the jobs that are posted to the job queue by your
 application, then grabbed and performed by your worker processes.
 
-C<TheSchwartz::Job> is a C<Data::ObjectDriver> model class. See
+C<Enegger::Job> is a C<Data::ObjectDriver> model class. See
 L<Data::ObjectDriver::BaseObject>.
 
 =head1 FIELDS
 
-C<TheSchwartz::Job> objects have these possible fields:
+C<Enegger::Job> objects have these possible fields:
 
 =head2 C<jobid>
 
@@ -359,9 +359,9 @@ The unique numeric identifier for this job. Set automatically when saved.
 
 =head2 C<funcid>
 
-The numeric identifier for the type of job to perform. C<TheSchwartz> clients
+The numeric identifier for the type of job to perform. C<Enegger> clients
 map function names (also known as abilities and worker class names) to these
-numbers using C<TheSchwartz::FuncMap> records.
+numbers using C<Enegger::FuncMap> records.
 
 =head2 C<arg>
 
@@ -372,7 +372,7 @@ as a reference, the data is frozen to a blob with the C<Storable> module.
 
 An arbitrary string identifier used to prevent applications from posting
 duplicate jobs. At most one with the same C<uniqkey> value can be posted to a
-single C<TheSchwartz> database.
+single C<Enegger> database.
 
 =head2 C<insert_time>
 
@@ -393,7 +393,7 @@ reset to C<0> when is released due to failure to complete the job.
 =head2 C<priority>
 
 An integer value to specify the priority of the job to be executed; larger
-numbers mean higher priority. See C<prioritize> property of L<TheSchwartz> for
+numbers mean higher priority. See C<prioritize> property of L<Enegger> for
 details.
 
 =head2 C<coalesce>
@@ -406,12 +406,12 @@ connecting to it once.
 
 =head1 USAGE
 
-=head2 C<TheSchwartz::Job-E<gt>new( %args )>
+=head2 C<Enegger::Job-E<gt>new( %args )>
 
 Returns a new job object with the given data. Members of C<%args> can be keyed
 on any of the fields described above, or C<funcname>.
 
-=head2 C<TheSchwartz::Job-E<gt>new_from_array( $funcname, $arg )>
+=head2 C<Enegger::Job-E<gt>new_from_array( $funcname, $arg )>
 
 Returns a new job with the given function name (also called I<ability> or
 I<worker class>), and the scalar or reference C<$arg> for an argument.
@@ -423,10 +423,10 @@ if specified.
 
 =head2 C<$job-E<gt>handle([ $handle ])>
 
-Returns the C<TheSchwartz::JobHandle> object describing this job, after setting
+Returns the C<Enegger::JobHandle> object describing this job, after setting
 it to C<$handle>, if specified. A I<job handle> is a convenience class for
 accessing other records related to jobs; as its convenience methods are also
-available directly from C<TheSchwartz::Job> instances, you will usually not
+available directly from C<Enegger::Job> instances, you will usually not
 need to work directly with job handles.
 
 =head2 C<$job-E<gt>driver()>
@@ -436,7 +436,7 @@ which C<$job> is stored. See L<Data::ObjectDriver>.
 
 =head2 C<$job-E<gt>add_failure( $msg )>
 
-Records and returns a new C<TheSchwartz::Error> object representing a failure
+Records and returns a new C<Enegger::Error> object representing a failure
 to perform C<$job>, for reason C<$msg>.
 
 =head2 C<$job-E<gt>exit_status()>
@@ -472,16 +472,16 @@ a job object. See also C<$job-E<gt>declined()>
 
 =head2 C<$job-E<gt>debug( $msg )>
 
-Sends the given message to the job's C<TheSchwartz> client as debug output.
+Sends the given message to the job's C<Enegger> client as debug output.
 
 =head2 C<$job-E<gt>set_as_current()>
 
-Set C<$job> as the current job being performed by its associated C<TheSchwartz>
+Set C<$job> as the current job being performed by its associated C<Enegger>
 client.
 
 =head1 WORKING
 
-C<TheSchwartz::Worker> classes should use these methods to update the status of
+C<Enegger::Worker> classes should use these methods to update the status of
 their jobs:
 
 =head2 C<$job-E<gt>completed()>

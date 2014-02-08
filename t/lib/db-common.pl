@@ -77,9 +77,9 @@ sub test_client {
             my $driver =  Data::ObjectDriver::Driver::DBI->new( dbh => $dbh); 
             push @tmp, { driver => $driver, prefix => $pfx };
         } }
-        return TheSchwartz->new(databases => [@tmp]); 
+        return Enegger->new(databases => [@tmp]); 
     } else {
-        return TheSchwartz->new(databases => [
+        return Enegger->new(databases => [
                                           map { {
                                               dsn  => dsn_for($_),
                                               user => $ENV{TS_DB_USER},

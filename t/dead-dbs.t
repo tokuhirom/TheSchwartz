@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 6;
 
 run_tests(2, sub {
@@ -36,7 +36,7 @@ run_tests(2, sub {
 
 ############################################################################
 package Worker::Addition;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

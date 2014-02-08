@@ -5,7 +5,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 26*3;
 
 run_tests(26, sub {
@@ -14,13 +14,13 @@ run_tests(26, sub {
     # insert a job
     {
         my $handle = $client->insert("Worker::Addition", { numbers => [1, 2] });
-        isa_ok $handle, 'TheSchwartz::JobHandle', "inserted job";
+        isa_ok $handle, 'Enegger::JobHandle', "inserted job";
     }
 
     # let's do some work.  the tedious way, specifying which class should grab a job
     {
         my $job = Worker::Addition->grab_job($client);
-        isa_ok $job, 'TheSchwartz::Job';
+        isa_ok $job, 'Enegger::Job';
         my $args = $job->arg;
         is(ref $args, "HASH");  # thawed it for us
         is_deeply($args, { numbers => [1, 2] }, "got our args back");
@@ -44,10 +44,10 @@ run_tests(26, sub {
                         )
     {
         my $handle = $client->insert("Worker::Addition", $scalar);
-        isa_ok $handle, 'TheSchwartz::JobHandle', "inserted job";
+        isa_ok $handle, 'Enegger::JobHandle', "inserted job";
 
         my $job = Worker::Addition->grab_job($client);
-        isa_ok $job, 'TheSchwartz::Job';
+        isa_ok $job, 'Enegger::Job';
         my $args = $job->arg;
         ok(!ref $args, "not a reference");  # not a reference
         is($args, $scalar, "got correct scalar arg back");
@@ -82,7 +82,7 @@ run_tests(26, sub {
         ok($handle);
 
         my $job = Worker::Division->grab_job($client);
-        isa_ok $job, 'TheSchwartz::Job';
+        isa_ok $job, 'Enegger::Job';
 
         # wrapper around 'work' implemented in the base class which runs work in
         # eval and notes a failure (with backoff) if job died.
@@ -97,7 +97,7 @@ run_tests(26, sub {
 
 ############################################################################
 package Worker::Addition;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;
@@ -112,7 +112,7 @@ sub grab_for { 30 }
 
 ############################################################################
 package Worker::MergeInternalDict;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 my %internal_dict;
 
 sub reset { %internal_dict = (); }
@@ -130,7 +130,7 @@ sub grab_for { 10 }
 
 ############################################################################
 package Worker::Division;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

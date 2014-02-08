@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 2;
 
 # how we keep track of if job was done twice:  signal from children back up to us
@@ -18,7 +18,7 @@ $SIG{USR1} = sub {
 # force the race condition to happen
 {
     no warnings 'once';
-    $TheSchwartz::T_AFTER_GRAB_SELECT_BEFORE_UPDATE = sub {
+    $Enegger::T_AFTER_GRAB_SELECT_BEFORE_UPDATE = sub {
         select undef, undef, undef, 1.5;
     };
 }
@@ -36,7 +36,7 @@ run_tests_innodb(2, sub {
     {
         my $client = test_client(dbs => ['ts1']);
         my $handle = $client->insert("Worker::Addition", { numbers => [1, 2] });
-        isa_ok $handle, 'TheSchwartz::JobHandle', "inserted job";
+        isa_ok $handle, 'Enegger::JobHandle', "inserted job";
     }
 
     # two children to race to get the above job.
@@ -73,7 +73,7 @@ sub work {
 
 ############################################################################
 package Worker::Addition;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

@@ -7,7 +7,7 @@ plan skip_all => "Test::Pod::Coverage 1.08 required for testing POD coverage" if
 ## Eventually we would be able to test coverage for all modules with
 ## Test::Pod::all_pod_files(), but let's write the docs first.
 my %modules = (
-    'TheSchwartz' => {
+    'Enegger' => {
         also_private => [
             map { qr{ \A $_ \z }xms } qw(
                 current_job debug driver_for funcid_to_name funcname_to_id
@@ -18,8 +18,8 @@ my %modules = (
             )
         ],
     },
-    'TheSchwartz::Worker' => 1,
-    'TheSchwartz::Job'    => 1,
+    'Enegger::Worker' => 1,
+    'Enegger::Job'    => 1,
 );
 
 plan tests => scalar keys %modules;

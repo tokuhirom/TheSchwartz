@@ -1,6 +1,6 @@
 # $Id$
 
-package TheSchwartz::ExitStatus;
+package Enegger::ExitStatus;
 use strict;
 use base qw( Data::ObjectDriver::BaseObject );
 

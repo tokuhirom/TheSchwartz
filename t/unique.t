@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 18;
 
 #use Data::ObjectDriver;
@@ -17,16 +17,16 @@ run_tests(6, sub {
     my ($job, $handle);
 
     # insert a job with unique
-    $job = TheSchwartz::Job->new(
+    $job = Enegger::Job->new(
                                  funcname => 'feed',
                                  uniqkey   => "major",
                                  );
     ok($job, "made first feed major job");
     $handle = $client->insert($job);
-    isa_ok $handle, 'TheSchwartz::JobHandle';
+    isa_ok $handle, 'Enegger::JobHandle';
 
     # insert again (notably to same db) and see it fails
-    $job = TheSchwartz::Job->new(
+    $job = Enegger::Job->new(
                                  funcname => 'feed',
                                  uniqkey  => "major",
                                  );
@@ -35,12 +35,12 @@ run_tests(6, sub {
     ok(! $handle, 'no handle');
 
     # insert same uniqkey, but different func
-    $job = TheSchwartz::Job->new(
+    $job = Enegger::Job->new(
                                  funcname => 'scratch',
                                  uniqkey   => "major",
                                  );
     ok($job, "made scratch major job");
     $handle = $client->insert($job);
-    isa_ok $handle, 'TheSchwartz::JobHandle';
+    isa_ok $handle, 'Enegger::JobHandle';
 
 });

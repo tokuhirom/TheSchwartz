@@ -6,7 +6,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 24;
 
 run_tests(8, sub {
@@ -15,7 +15,7 @@ run_tests(8, sub {
     # insert a job which will fail, fail, then succeed.
     {
         my $handle = $client->insert("Worker::CompleteEventually");
-        isa_ok $handle, 'TheSchwartz::JobHandle', "inserted job";
+        isa_ok $handle, 'Enegger::JobHandle', "inserted job";
 
         $client->can_do("Worker::CompleteEventually");
         $client->work_until_done;
@@ -45,7 +45,7 @@ run_tests(8, sub {
 
 ############################################################################
 package Worker::CompleteEventually;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 
 sub work {
     my ($class, $job) = @_;

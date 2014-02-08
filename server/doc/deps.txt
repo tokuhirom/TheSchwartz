@@ -1,4 +1,4 @@
-TheSchwartz (itself)
+Enegger (itself)
 Data::ObjectDriver
   DBI
   Class::Accessor::Fast (libclass-accessor-perl)

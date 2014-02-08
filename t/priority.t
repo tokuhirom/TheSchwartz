@@ -5,7 +5,7 @@ use warnings;
 
 require 't/lib/db-common.pl';
 
-use TheSchwartz;
+use Enegger;
 use Test::More tests => 31*3;
 
 our $record_expected;
@@ -17,10 +17,10 @@ run_tests(31, sub {
     # limit batch size to 1 so we always process jobs in
     # priority order
     $client->set_prioritize(1);
-    $TheSchwartz::FIND_JOB_BATCH_SIZE = 1;
+    $Enegger::FIND_JOB_BATCH_SIZE = 1;
 
     for (1..10) {
-        my $job = TheSchwartz::Job->new(
+        my $job = Enegger::Job->new(
                                         funcname => 'Worker::PriorityTest',
                                         arg      => { num => $_ },
                                         ( $_ == 1 ? () : ( priority => $_ ) ),
@@ -47,7 +47,7 @@ run_tests(31, sub {
 
 ############################################################################
 package Worker::PriorityTest;
-use base 'TheSchwartz::Worker';
+use base 'Enegger::Worker';
 use Test::More;
 
 use strict;
